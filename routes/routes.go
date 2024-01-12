@@ -8,12 +8,11 @@ import (
 
 // SetAudioguideRoutes sets up routes for the Audioguide model.
 func SetAudioguideRoutes(router *mux.Router, audioguideController *controllers.AudioguideController) {
-	router.HandleFunc("/audioguides", audioguideController.GetAllAudioguides).Methods("GET")
-	router.HandleFunc("/audioguides", audioguideController.CreateAudioguide).Methods("POST")
+	router.HandleFunc("/api/audioguides", audioguideController.GetAllAudioguides).Methods("GET")
 }
 
 // SetBuildingRoutes sets up routes for the Building model.
 func SetBuildingRoutes(router *mux.Router, buildingController *controllers.BuildingController) {
-	router.HandleFunc("/buildings", buildingController.GetAllBuildings).Methods("GET")
-	router.HandleFunc("/buildings", buildingController.CreateBuilding).Methods("POST")
+	router.HandleFunc("/api/buildings", buildingController.GetAllBuildings).Methods("GET")
+	router.HandleFunc("/api/buildings/{id}", buildingController.GetBuildingByID).Methods("GET")
 }

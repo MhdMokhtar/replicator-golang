@@ -7,23 +7,40 @@ import (
 	"my-golang-api/controllers"
 	"my-golang-api/routes"
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func main() {
-   // Initialize MongoDB client
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://mongodb:27017"))
+func loadEnv() {
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error loading .env file")
 	}
+}
 
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
+func main() {
+	// Load environment variables from .env file
+	loadEnv()
+
+	// Initialize MongoDB client
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+ 
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGODB_URI"))
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Fatal("Could not connect to MongoDB:", err)
+	   log.Fatal(err)
+	}
+ 
+	// Check the connection
+	err = client.Ping(ctx, nil)
+	if err != nil {
+	   log.Fatal(err)
 	}
 
 	// Set up a new router
@@ -31,11 +48,11 @@ func main() {
 
 	// Set up controllers
 	audioguideController := &controllers.AudioguideController{
-		Collection: client.Database("my-golang-api").Collection("audioguides"),
+		Collection: client.Database(os.Getenv("anno-amsterdam")).Collection("audioguides"),
 	}
 
 	buildingController := &controllers.BuildingController{
-		Collection: client.Database("my-golang-api").Collection("buildings"),
+		Collection: client.Database(os.Getenv("anno-amsterdam")).Collection("buildings"),
 	}
 
 	// Set up routes for the Audioguide model
@@ -44,7 +61,8 @@ func main() {
 	// Set up routes for the Building model
 	routes.SetBuildingRoutes(router, buildingController)
 
-	// Start the server
-	log.Println("Server is running on :9000")
-	log.Fatal(http.ListenAndServe(":9000", router))
+	// Start the server on the configured port
+	apiPort := os.Getenv("API_PORT")
+	log.Printf("Server is running on :%s\n", apiPort)
+	log.Fatal(http.ListenAndServe(":"+apiPort, router))
 }

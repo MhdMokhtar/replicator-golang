@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "9000:9000"
+      - "${API_PORT}:${API_PORT}"
     depends_on:
       - mongodb
   mongodb:
