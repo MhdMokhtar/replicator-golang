@@ -45,6 +45,6 @@ func main() {
 	routes.SetBuildingRoutes(router, buildingController)
 
 	// Start the server
-	log.Println("Server is running on :8080")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Println("Server is running on :9000")
+	log.Fatal(http.ListenAndServe(":9000", router))
 }
